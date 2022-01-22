@@ -5534,26 +5534,6 @@ static struct ctl_table oa_table[] = {
 	{}
 };
 
-static struct ctl_table i915_root[] = {
-	{
-	 .procname = "i915",
-	 .maxlen = 0,
-	 .mode = 0555,
-	 .child = oa_table,
-	 },
-	{}
-};
-
-static struct ctl_table dev_root[] = {
-	{
-	 .procname = "dev",
-	 .maxlen = 0,
-	 .mode = 0555,
-	 .child = i915_root,
-	 },
-	{}
-};
-
 static u32 __num_perf_groups_per_gt(struct intel_gt *gt)
 {
 	enum intel_platform platform = INTEL_INFO(gt->i915)->platform;
@@ -6147,7 +6127,7 @@ static int destroy_config(int id, void *p, void *data)
 
 int i915_perf_sysctl_register(void)
 {
-	sysctl_header = register_sysctl_table(dev_root);
+	sysctl_header = register_sysctl("dev/i915", oa_table);
 	return 0;
 }
 
