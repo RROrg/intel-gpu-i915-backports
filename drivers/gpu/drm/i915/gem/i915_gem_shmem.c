@@ -166,8 +166,8 @@ static void shmem_queue(struct shmem_chunk *chunk)
 static int shmem_create(struct shmem_work *wrk)
 {
 	const unsigned int limit = boot_cpu_data.x86_cache_size << 9 ?: SZ_8M;
-	const uint32_t max_segment = i915_sg_segment_size();
 	struct drm_i915_gem_object *obj = wrk->obj;
+  const uint32_t max_segment = i915_sg_segment_size(obj->base.dev->dev);
 	const int nid = dev_to_node(obj->base.dev->dev);
 	u64 remain = obj->base.size, start;
 	struct sg_table *sgt = wrk->pages;

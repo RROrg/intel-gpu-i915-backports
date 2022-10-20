@@ -24,7 +24,7 @@ unsigned int i915_gem_sg_segment_size(const struct drm_i915_gem_object *obj)
 	if (i915_gem_object_is_lmem(obj))
 		return rounddown_pow_of_two(UINT_MAX);
 
-	return rounddown_pow_of_two(i915_sg_segment_size());
+	return rounddown_pow_of_two(i915_sg_segment_size(obj->base.dev->dev));
 }
 
 void __i915_gem_object_set_pages(struct drm_i915_gem_object *obj,
