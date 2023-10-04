@@ -748,8 +748,11 @@ int drm_dp_dpcd_read_phy_link_status(struct drm_dp_aux *aux,
 }
 EXPORT_SYMBOL(drm_dp_dpcd_read_phy_link_status);
 
-static bool is_edid_digital_input_dp(const struct edid *edid)
+static bool is_edid_digital_input_dp(const struct drm_edid *drm_edid)
 {
+	/* FIXME: get rid of drm_edid_raw() */
+	const struct edid *edid = drm_edid_raw(drm_edid);
+
 	return edid && edid->revision >= 4 &&
 		edid->input & DRM_EDID_INPUT_DIGITAL &&
 		(edid->input & DRM_EDID_DIGITAL_TYPE_MASK) == DRM_EDID_DIGITAL_TYPE_DP;
@@ -781,13 +784,13 @@ EXPORT_SYMBOL(drm_dp_downstream_is_type);
  * drm_dp_downstream_is_tmds() - is the downstream facing port TMDS?
  * @dpcd: DisplayPort configuration data
  * @port_cap: port capabilities
- * @edid: EDID
+ * @drm_edid: EDID
  *
  * Returns: whether the downstream facing port is TMDS (HDMI/DVI).
  */
 bool drm_dp_downstream_is_tmds(const u8 dpcd[DP_RECEIVER_CAP_SIZE],
 			       const u8 port_cap[4],
-			       const struct edid *edid)
+			       const struct drm_edid *drm_edid)
 {
 	if (dpcd[DP_DPCD_REV] < 0x11) {
 		switch (dpcd[DP_DOWNSTREAMPORT_PRESENT] & DP_DWN_STRM_PORT_TYPE_MASK) {
@@ -800,7 +803,7 @@ bool drm_dp_downstream_is_tmds(const u8 dpcd[DP_RECEIVER_CAP_SIZE],
 
 	switch (port_cap[0] & DP_DS_PORT_TYPE_MASK) {
 	case DP_DS_PORT_TYPE_DP_DUALMODE:
-		if (is_edid_digital_input_dp(edid))
+		if (is_edid_digital_input_dp(drm_edid))
 			return false;
 		fallthrough;
 	case DP_DS_PORT_TYPE_DVI:
@@ -1038,14 +1041,14 @@ EXPORT_SYMBOL(drm_dp_downstream_max_dotclock);
  * drm_dp_downstream_max_tmds_clock() - extract downstream facing port max TMDS clock
  * @dpcd: DisplayPort configuration data
  * @port_cap: port capabilities
- * @edid: EDID
+ * @drm_edid: EDID
  *
  * Returns: HDMI/DVI downstream facing port max TMDS clock in kHz on success,
  * or 0 if max TMDS clock not defined
  */
 int drm_dp_downstream_max_tmds_clock(const u8 dpcd[DP_RECEIVER_CAP_SIZE],
 				     const u8 port_cap[4],
-				     const struct edid *edid)
+				     const struct drm_edid *drm_edid)
 {
 	if (!drm_dp_is_branch(dpcd))
 		return 0;
@@ -1061,7 +1064,7 @@ int drm_dp_downstream_max_tmds_clock(const u8 dpcd[DP_RECEIVER_CAP_SIZE],
 
 	switch (port_cap[0] & DP_DS_PORT_TYPE_MASK) {
 	case DP_DS_PORT_TYPE_DP_DUALMODE:
-		if (is_edid_digital_input_dp(edid))
+		if (is_edid_digital_input_dp(drm_edid))
 			return 0;
 		/*
 		 * It's left up to the driver to check the
@@ -1103,14 +1106,14 @@ EXPORT_SYMBOL(drm_dp_downstream_max_tmds_clock);
  * drm_dp_downstream_min_tmds_clock() - extract downstream facing port min TMDS clock
  * @dpcd: DisplayPort configuration data
  * @port_cap: port capabilities
- * @edid: EDID
+ * @drm_edid: EDID
  *
  * Returns: HDMI/DVI downstream facing port min TMDS clock in kHz on success,
  * or 0 if max TMDS clock not defined
  */
 int drm_dp_downstream_min_tmds_clock(const u8 dpcd[DP_RECEIVER_CAP_SIZE],
 				     const u8 port_cap[4],
-				     const struct edid *edid)
+				     const struct drm_edid *drm_edid)
 {
 	if (!drm_dp_is_branch(dpcd))
 		return 0;
@@ -1126,7 +1129,7 @@ int drm_dp_downstream_min_tmds_clock(const u8 dpcd[DP_RECEIVER_CAP_SIZE],
 
 	switch (port_cap[0] & DP_DS_PORT_TYPE_MASK) {
 	case DP_DS_PORT_TYPE_DP_DUALMODE:
-		if (is_edid_digital_input_dp(edid))
+		if (is_edid_digital_input_dp(drm_edid))
 			return 0;
 		fallthrough;
 	case DP_DS_PORT_TYPE_DVI:
@@ -1147,13 +1150,13 @@ EXPORT_SYMBOL(drm_dp_downstream_min_tmds_clock);
  *                               bits per component
  * @dpcd: DisplayPort configuration data
  * @port_cap: downstream facing port capabilities
- * @edid: EDID
+ * @drm_edid: EDID
  *
  * Returns: Max bpc on success or 0 if max bpc not defined
  */
 int drm_dp_downstream_max_bpc(const u8 dpcd[DP_RECEIVER_CAP_SIZE],
 			      const u8 port_cap[4],
-			      const struct edid *edid)
+			      const struct drm_edid *drm_edid)
 {
 	if (!drm_dp_is_branch(dpcd))
 		return 0;
@@ -1171,7 +1174,7 @@ int drm_dp_downstream_max_bpc(const u8 dpcd[DP_RECEIVER_CAP_SIZE],
 	case DP_DS_PORT_TYPE_DP:
 		return 0;
 	case DP_DS_PORT_TYPE_DP_DUALMODE:
-		if (is_edid_digital_input_dp(edid))
+		if (is_edid_digital_input_dp(drm_edid))
 			return 0;
 		fallthrough;
 	case DP_DS_PORT_TYPE_HDMI:
@@ -1364,14 +1367,14 @@ EXPORT_SYMBOL(drm_dp_downstream_id);
  * @m: pointer for debugfs file
  * @dpcd: DisplayPort configuration data
  * @port_cap: port capabilities
- * @edid: EDID
+ * @drm_edid: EDID
  * @aux: DisplayPort AUX channel
  *
  */
 void drm_dp_downstream_debug(struct seq_file *m,
 			     const u8 dpcd[DP_RECEIVER_CAP_SIZE],
 			     const u8 port_cap[4],
-			     const struct edid *edid,
+			     const struct drm_edid *drm_edid,
 			     struct drm_dp_aux *aux)
 {
 	bool detailed_cap_info = dpcd[DP_DOWNSTREAMPORT_PRESENT] &
@@ -1434,15 +1437,15 @@ void drm_dp_downstream_debug(struct seq_file *m,
 		if (clk > 0)
 			seq_printf(m, "\t\tMax dot clock: %d kHz\n", clk);
 
-		clk = drm_dp_downstream_max_tmds_clock(dpcd, port_cap, edid);
+		clk = drm_dp_downstream_max_tmds_clock(dpcd, port_cap, drm_edid);
 		if (clk > 0)
 			seq_printf(m, "\t\tMax TMDS clock: %d kHz\n", clk);
 
-		clk = drm_dp_downstream_min_tmds_clock(dpcd, port_cap, edid);
+		clk = drm_dp_downstream_min_tmds_clock(dpcd, port_cap, drm_edid);
 		if (clk > 0)
 			seq_printf(m, "\t\tMin TMDS clock: %d kHz\n", clk);
 
-		bpc = drm_dp_downstream_max_bpc(dpcd, port_cap, edid);
+		bpc = drm_dp_downstream_max_bpc(dpcd, port_cap, drm_edid);
 
 		if (bpc > 0)
 			seq_printf(m, "\t\tMax bpc: %d\n", bpc);
