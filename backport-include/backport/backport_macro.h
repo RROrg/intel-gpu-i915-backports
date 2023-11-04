@@ -4,6 +4,8 @@
 #include <linux/kconfig.h>
 #include <backport/autoconf.h>
 
+#define BPM_ADD_MODULE_VERSION_MACRO_IN_ALL_MOD
+
 #if 1 || (LINUX_VERSION_IS_GEQ(6,4,5) || \
 		LINUX_VERSION_IN_RANGE(6,1,42, 6,2,0) || \
 		(SUSE_RELEASE_VERSION_IS_GEQ(1,15,5,0) && SUSE_LOCAL_VERSION_IS_GEQ(55,12)))
