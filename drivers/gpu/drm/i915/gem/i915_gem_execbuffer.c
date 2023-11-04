@@ -1782,7 +1782,7 @@ static inline bool use_reloc_gpu(struct i915_vma *vma)
 	if (i915_gem_object_has_migrate(vma->obj))
 		return true;
 
-	return !dma_resv_test_signaled(vma->resv, true);
+	return !dma_resv_test_signaled(vma->resv, DMA_RESV_USAGE_READ);
 }
 
 static unsigned long vma_phys_addr(struct i915_vma *vma, u32 offset)

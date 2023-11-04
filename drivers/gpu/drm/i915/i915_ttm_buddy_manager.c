@@ -50,8 +50,8 @@ static int i915_ttm_buddy_man_alloc(struct ttm_resource_manager *man,
 	INIT_LIST_HEAD(&bman_res->blocks);
 	bman_res->mm = mm;
 
-	GEM_BUG_ON(!bman_res->base.num_pages);
-	size = bman_res->base.num_pages << PAGE_SHIFT;
+	GEM_BUG_ON(!bman_res->base.size);
+	size = bman_res->base.size;
 
 	min_page_size = bo->page_alignment << PAGE_SHIFT;
 	GEM_BUG_ON(min_page_size < mm->chunk_size);

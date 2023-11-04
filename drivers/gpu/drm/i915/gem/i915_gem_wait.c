@@ -240,7 +240,7 @@ bool i915_gem_object_is_active(struct drm_i915_gem_object *obj)
 	if (i915_gem_object_has_migrate(obj))
 		return true;
 
-	return !dma_resv_test_signaled(obj->base.resv, true);
+	return !dma_resv_test_signaled(obj->base.resv, DMA_RESV_USAGE_READ);
 }
 
 static inline unsigned long nsecs_to_jiffies_timeout(const u64 n)

@@ -11,7 +11,7 @@
 void dma_resv_prune(struct dma_resv *resv)
 {
 	if (dma_resv_trylock(resv)) {
-		if (dma_resv_test_signaled(resv, true))
+		if (dma_resv_test_signaled(resv, DMA_RESV_USAGE_READ))
 			dma_resv_add_excl_fence(resv, NULL);
 		dma_resv_unlock(resv);
 	}

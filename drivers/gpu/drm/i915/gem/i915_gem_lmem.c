@@ -1992,7 +1992,7 @@ static u32 expand_u32_from_u8(u32 x)
 static int suboffset(int i, int len, int sz)
 {
 	/* Leave space for a 64b read */
-	return prandom_u32_max(min(len - i * sz, sz)) & -8;
+	return get_random_u32_below(min(len - i * sz, sz)) & -8;
 }
 
 int i915_gem_lmemtest(struct intel_gt *gt, u64 *error_bits)

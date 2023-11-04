@@ -24,7 +24,7 @@ void prandom_bytes(void *buf, int bytes);
 
 #if LINUX_VERSION_IS_LESS(3,14,0)
 /**
- * prandom_u32_max - returns a pseudo-random number in interval [0, ep_ro)
+ * get_random_u32_below - returns a pseudo-random number in interval [0, ep_ro)
  * @ep_ro: right open interval endpoint
  *
  * Returns a pseudo-random number that is in interval [0, ep_ro). Note
@@ -35,8 +35,8 @@ void prandom_bytes(void *buf, int bytes);
  *
  * Returns: pseudo-random number in interval [0, ep_ro)
  */
-#define prandom_u32_max LINUX_I915_BACKPORT(prandom_u32_max)
-static inline u32 prandom_u32_max(u32 ep_ro)
+#define get_random_u32_below LINUX_I915_BACKPORT(get_random_u32_below)
+static inline u32 get_random_u32_below(u32 ep_ro)
 {
 	return (u32)(((u64) prandom_u32() * ep_ro) >> 32);
 }
