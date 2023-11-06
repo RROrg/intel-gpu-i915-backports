@@ -70,7 +70,9 @@
 #include "gt/intel_workarounds.h"
 #include "gt/uc/intel_uc.h"
 
+#if IS_ENABLED(CPTCFG_DRM_I915_SPI)
 #include "spi/intel_spi.h"
+#endif
 
 #include "i915_drm_client.h"
 #include "i915_gem.h"
@@ -831,7 +833,9 @@ struct drm_i915_private {
 
 	struct i915_perf perf;
 
+#if IS_ENABLED(CPTCFG_DRM_I915_SPI)
 	struct intel_spi spi;
+#endif
 
 	struct i915_hwmon *hwmon;
 

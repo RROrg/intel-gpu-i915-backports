@@ -28,7 +28,6 @@ config DRM_I915
 	select CEC_CORE if CEC_NOTIFIER
 	depends on VMAP_PFN
         depends on AUXILIARY_BUS || MFD_CORE
-	depends on MTD
 	help
 	  Choose this option if you have a system that has "Intel Graphics
 	  Media Accelerator" or "HD Graphics" integrated graphics,
@@ -194,6 +193,16 @@ config DRM_I915_ATS
 	  be able to request a system translation of a Virtual Address (VA)
 	  into either a Host Physical Address (HPA) or Guest Physical
 	  Address (GPA) for native and virtualized environments respectively.
+
+config DRM_I915_SPI
+	tristate "Enable Intel DGFX SPI driver"
+	depends on m
+	depends on DRM_I915
+	depends on MTD
+	default n
+	help
+	  Choose this option if you want to enable access to internal spi on
+	  DGFX devices via a child device.
 
 menu "drm/i915 Debugging"
 depends on DRM_I915

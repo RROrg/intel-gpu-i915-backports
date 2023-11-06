@@ -237,7 +237,7 @@ i915-y += gt/uc/intel_uc.o \
 i915-y += gt/intel_gsc.o
 
 # graphics spi device (DGFX) support
-i915-y += spi/intel_spi.o
+i915-$(CPTCFG_DRM_I915_SPI) += spi/intel_spi.o
 
 # Virtualization support
 iov-y += \
@@ -409,7 +409,7 @@ obj-$(CPTCFG_DRM_I915) += i915.o
 obj-$(CPTCFG_DRM_I915_GVT_KVMGT) += gvt/kvmgt.o
 obj-$(CPTCFG_DRM_I915_INTEL_FABRIC) += fabric/
 
-obj-m += i915_spi.o
+obj-$(CPTCFG_DRM_I915_SPI) += i915_spi.o
 i915_spi-y := spi/intel_spi_drv.o
 
 # header test
