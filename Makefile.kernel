@@ -50,6 +50,7 @@ else
 obj-y += drivers/gpu/drm/
 
 obj-y += drivers/char/agp/
+obj-y += drivers/video/
 endif
 endif
 

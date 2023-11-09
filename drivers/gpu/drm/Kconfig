@@ -16,6 +16,7 @@ menuconfig DRM
 	depends on I2C
 	depends on I2C_ALGOBIT
 	depends on DMA_SHARED_BUFFER
+	select HDMI
 # gallium uses SYS_kcmp for os_same_file_description() to de-duplicate
 # device and dmabuf fd. Let's make sure that is available for our userspace.
 	help

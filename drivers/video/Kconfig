@@ -1,0 +1,16 @@
+# SPDX-License-Identifier: GPL-2.0-only
+#
+# Video configuration
+#
+
+menu "Graphics support"
+
+if HAS_IOMEM
+
+config HDMI
+	tristate
+	depends on m
+
+endif # HAS_IOMEM
+
+endmenu
