@@ -12,7 +12,6 @@ config DRM_I915
 	depends on SHMEM
 	depends on TMPFS
 	select DRM_KMS_HELPER if DRM
-	depends on DRM_PANEL
 	select DRM_MIPI_DSI if DRM
 	depends on RELAY
 	depends on IRQ_WORK

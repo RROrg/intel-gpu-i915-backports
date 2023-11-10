@@ -5,7 +5,7 @@
 
 #if LINUX_VERSION_IS_LESS(6,0,0)
 
-#if !((REDHAT_RELEASE_VERSION_IS_LEQ(9,0)) || CUSTOM_KERN_1_RELEASE_VERSION_IS_GEQ(8,6656))
+#if !((REDHAT_RELEASE_VERSION_IS_LEQ(9,0)) || CUSTOM_KERN_1_RELEASE_VERSION_IS_GEQ(8,6656) || !defined(CONFIG_INTEL_GTT))
 /*
  * 0ade638655f0 intel-gtt: introduce drm/intel-gtt.h
  */
@@ -314,7 +314,7 @@
 #if !(SUSE_RELEASE_VERSION_IS_GEQ(1,15,3,0))
 
 /* Need to check the need of panel_orientatio_quirks */
-#define BPM_DRM_GET_PANEL_ORIENTATION_QUIRK_DONT_EXPORT
+// #define BPM_DRM_GET_PANEL_ORIENTATION_QUIRK_DONT_EXPORT
 #endif
 
 /*

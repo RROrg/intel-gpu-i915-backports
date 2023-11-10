@@ -40,7 +40,7 @@
 #endif
 
 #ifndef CPTCFG_DRM_FBDEV_EMULATION
-#define CPTCFG_DRM_FBDEV_EMULATION 1
+// #define CPTCFG_DRM_FBDEV_EMULATION 1
 #endif
 
 #ifndef CPTCFG_AGP
