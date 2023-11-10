@@ -41,7 +41,11 @@ DEFINE_EVENT(dma_fence, dma_fence_emit,
 	TP_ARGS(fence)
 );
 
+#ifdef BPM_ADD_BACKPORT_MACRO_TO_DMA_BUF_SYMBOLS
+DEFINE_EVENT(dma_fence, dmabufbkpt_dma_fence_init,
+#else
 DEFINE_EVENT(dma_fence, dma_fence_init,
+#endif
 
 	TP_PROTO(struct dma_fence *fence),
 

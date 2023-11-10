@@ -16,6 +16,11 @@
 #include <linux/dma-fence.h>
 #include <linux/sched/signal.h>
 
+#define CREATE_TRACE_POINTS
+#include <trace/events/dma_fence.h>
+
+EXPORT_TRACEPOINT_SYMBOL(dma_fence_signaled);
+
 static DEFINE_SPINLOCK(dma_fence_stub_lock);
 static struct dma_fence dma_fence_stub;
 
