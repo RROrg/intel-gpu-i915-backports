@@ -3,6 +3,14 @@
 #include <linux/version.h>
 #include <backport/autoconf.h>
 
+#ifdef CONFIG_SYNO_EPYC7002
+// These modules are declared in kernel .config but not actually present on the
+// system. Undef the flags to avoid introducing unnecessary dependencies.
+#undef CONFIG_FB_MODULE
+#undef CONFIG_ACPI_VIDEO_MODULE
+#undef CONFIG_BACKLIGHT_CLASS_DEVICE_MODULE
+#endif
+
 #if LINUX_VERSION_IS_LESS(6,0,0)
 
 #if !((REDHAT_RELEASE_VERSION_IS_LEQ(9,0)) || CUSTOM_KERN_1_RELEASE_VERSION_IS_GEQ(8,6656) || !defined(CONFIG_INTEL_GTT))
