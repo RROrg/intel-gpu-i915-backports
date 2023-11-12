@@ -435,6 +435,9 @@ static void *i915_gem_object_map_page(struct drm_i915_gem_object *obj,
 static void *i915_gem_object_map_pfn(struct drm_i915_gem_object *obj,
 				     enum i915_map_type type)
 {
+#ifndef CONFIG_VMAP_PFN
+	return ERR_PTR(-ENODEV);
+#else
 	struct intel_memory_region *mem = obj->mm.region.mem;
 	resource_size_t iomap = mem->iomap.base - mem->region.start;
 	unsigned long n_pfn = obj->base.size >> PAGE_SHIFT;
@@ -465,6 +468,7 @@ static void *i915_gem_object_map_pfn(struct drm_i915_gem_object *obj,
 		kvfree(pfns);
 
 	return vaddr ?: ERR_PTR(-ENOMEM);
+#endif
 }
 
 #else

@@ -26,7 +26,7 @@ config DRM_I915
 	depends on CRC32
 	select SND_HDA_I915 if SND_HDA_CORE
 	select CEC_CORE if CEC_NOTIFIER
-	depends on VMAP_PFN
+	select VMAP_PFN
         depends on AUXILIARY_BUS || MFD_CORE
 	help
 	  Choose this option if you have a system that has "Intel Graphics
