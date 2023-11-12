@@ -1,0 +1,37 @@
+name: Build i915 for DSM epyc7002
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Download toolchain
+        run: |
+          wget https://global.synologydownload.com/download/ToolChain/toolchain/7.2-63134/AMD%20x86%20Linux%20Linux%205.10.55%20%28epyc7002%29/epyc7002-gcc1220_glibc236_x86_64-GPL.txz
+          mkdir toolchain
+          tar xf epyc7002-gcc1220_glibc236_x86_64-GPL.txz -C toolchain
+
+      - name: Download kernel source
+        run: |
+          wget https://global.synologydownload.com/download/ToolChain/toolkit/7.2/epyc7002/ds.epyc7002-7.2.dev.txz
+          mkdir ksrc
+          tar xf ds.epyc7002-7.2.dev.txz -C ksrc
+
+      - name: Build
+        run: |
+          export BACKPORT_DIR=$PWD
+          export KLIB_BUILD=$PWD/ksrc/usr/local/x86_64-pc-linux-gnu/x86_64-pc-linux-gnu/sys-root/usr/lib/modules/DSM-7.2/build
+          export CROSS_COMPILE=$PWD/toolchain/x86_64-pc-linux-gnu/bin/x86_64-pc-linux-gnu-
+          make defconfig-drm
+          make -j$(nproc) modules_copy
+
+      - name: Save Build Result
+        uses: actions/upload-artifact@v3
+        with:
+          name: i915_dsm_epyc7002
+          path: out/modules/
