@@ -1002,10 +1002,13 @@ i915_gem_context_create_for_gt(struct intel_gt *gt, unsigned int flags)
 	if (HAS_FULL_PPGTT(i915)) {
 		struct i915_ppgtt *ppgtt;
 		u32 flags = 0;
+		intel_wakeref_t wakeref;
 
 		if (i915->params.enable_pagefault && HAS_RECOVERABLE_PAGE_FAULT(i915))
 			flags |= PRELIM_I915_VM_CREATE_FLAGS_ENABLE_PAGE_FAULT;
-		ppgtt = i915_ppgtt_create(gt, flags);
+		with_intel_runtime_pm(&i915->runtime_pm, wakeref) {
+			ppgtt = i915_ppgtt_create(gt, flags);
+		}
 		if (IS_ERR(ppgtt)) {
 			drm_dbg(&i915->drm, "PPGTT setup failed (%ld)\n",
 				PTR_ERR(ppgtt));
