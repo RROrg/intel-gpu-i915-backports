@@ -1572,7 +1572,6 @@ static void i915_pci_shutdown(struct pci_dev *pdev)
 	 * access the device again.
 	 */
 	i915->do_release = IS_SRIOV_VF(i915);
-	pci_set_drvdata(pdev, NULL);
 }
 
 /**
