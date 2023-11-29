@@ -119,8 +119,12 @@ BASE_KERNEL_NAME := $(BASE_KERNEL_NAME).$(EXTENDED_VERSION_Z)
 endif
 endif
 else ifeq ($(OSV_NAME),)
+ifeq ($(shell cat $(KLIB_BUILD)/include/generated/utsrelease.h | grep UTS_RELEASE | cut -d '"' -f2 | awk -F- '{print $$NF}'), pve)
+OSV_NAME = PVE
+EXTENDED_VERSION_X = $(shell cat $(KLIB_BUILD)/include/generated/utsrelease.h | grep UTS_RELEASE | cut -d '"' -f2 | cut -d '-' -f2)
+BASE_KERNEL_NAME = $(KERN_VER)-$(EXTENDED_VERSION_X)-pve
 # check for mainline and vanilla kernels using kernel versions
-ifeq ($(shell expr $(BASE_KERN) \== $(call  get_kernel_version,6,1)), 1)
+else ifeq ($(shell expr $(BASE_KERN) \== $(call  get_kernel_version,6,1)), 1)
 OSV_NAME = VANILLA_6.1LTS
 ADD_KV = $(shell cat versions | grep "$(OSV_NAME)_KERNEL_VERSION" | cut -d '"' -f 2)
 else ifeq ($(shell expr $(BASE_KERN) \== $(call  get_kernel_version,5,15)), 1)
@@ -287,6 +291,10 @@ define filechk_osv_version_rhel.h
 	$(shell expr $(EXTENDED_VERSION_X) \* 65536 + 0$(EXTENDED_VERSION_Y) \* 256 + 0$(EXTENDED_VERSION_Z))'
 endef
 
+define filechk_osv_version_pve.h
+        echo '#define PVE_BACKPORT_RELEASE_CODE $(EXTENDED_VERSION_X)'
+endef
+
 define filechk_osv_version_generic.h
         echo '#define GENERIC_BACKPORT_MAJOR $(EXTENDED_VERSION_X)'; \
         echo '#define GENERIC_BACKPORT_MINOR $(EXTENDED_VERSION_Y)'; \
@@ -336,6 +344,8 @@ ifeq ($(ADD_KV), )
 endif
 endif
 	$(call filechk,osv_version_rhel.h)
+else ifeq ($(OSV_NAME), PVE)
+	$(call filechk,osv_version_pve.h)
 else ifeq ($(CUSTOM_KERN_1_VER), CUSTOM_KERN_1)
 	$(call filechk,osv_custom_kernel_1.h)
 else
