@@ -365,11 +365,17 @@ BASE_KERNEL_NAME := $(BASE_KERNEL_NAME).$(EXTENDED_VERSION_Z)
 endif
 
 else ifeq ($(OSV_NAME),)
+
+ifeq ($(shell cat $(KLIB_BUILD)/include/generated/utsrelease.h | grep UTS_RELEASE | cut -d '"' -f2 | awk -F- '{print $$NF}'), pve)
+OSV_NAME = PVE
+EXTENDED_VERSION_X = $(shell cat $(KLIB_BUILD)/include/generated/utsrelease.h | grep UTS_RELEASE | cut -d '"' -f2 | cut -d '-' -f2)
+BASE_KERNEL_NAME = $(KERN_VER)-$(EXTENDED_VERSION_X)-pve
+
 #
 # Extract Vanilla/Mainline Variables
 #
 
-ifeq ($(shell expr $(KERN_VER_XY) \== $(call  get_kernel_version,5,4)), 1)
+else ifeq ($(shell expr $(KERN_VER_XY) \== $(call  get_kernel_version,5,4)), 1)
 OSV_NAME = VANILLA_5.4LTS
 OSV_KV_SUPPORTED = $(shell cat versions | grep "$(OSV_NAME)_KERNEL_VERSION" | cut -d '"' -f 2)
 else ifeq ($(shell test $(KERN_VER_XY) = 5.10 && test "$(BUILD_CONFIG)" != CUSTOM_KERN_3 && echo 1), 1) 
@@ -562,6 +568,10 @@ define filechk_osv_version_rhel.h
 	$(shell expr $(EXTENDED_VERSION_X) \* 65536 + 0$(EXTENDED_VERSION_Y) \* 256 + 0$(EXTENDED_VERSION_Z))'
 endef
 
+define filechk_osv_version_pve.h
+        echo '#define PVE_BACKPORT_RELEASE_CODE $(EXTENDED_VERSION_X)'
+endef
+
 define filechk_osv_version_generic.h
         echo '#define GENERIC_BACKPORT_MAJOR $(EXTENDED_VERSION_X)'; \
         echo '#define GENERIC_BACKPORT_MINOR $(EXTENDED_VERSION_Y)'; \
@@ -599,6 +609,8 @@ else ifeq ($(OSV_NAME), SUSE)
 	$(call filechk,osv_version_sles.h)
 else ifeq ($(OSV_NAME), RHEL)
 	$(call filechk,osv_version_rhel.h)
+else ifeq ($(OSV_NAME), PVE)
+	$(call filechk,osv_version_pve.h)
 else ifeq ($(CUSTOM_KERN_1_VER), CUSTOM_KERN_1)
 	$(call filechk,osv_custom_kernel_1.h)
 else ifeq ($(CUSTOM_KERN_3_VER), CUSTOM_KERN_3)
