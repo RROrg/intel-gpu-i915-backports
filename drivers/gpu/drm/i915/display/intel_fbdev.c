@@ -120,13 +120,23 @@ static int intel_fbdev_pan_display(struct fb_var_screeninfo *var,
 	return ret;
 }
 
+#ifndef BPM_DRM_DEDICATED_FB_IO_HELPERS_NOT_PRESENT
+__FB_GEN_DEFAULT_DEFERRED_OPS_DRAW(intel_fbdev,
+				   drm_fb_helper_damage_area,
+				   cfb)
+#endif
+
 static const struct fb_ops intelfb_ops = {
 	.owner = THIS_MODULE,
 	DRM_FB_HELPER_DEFAULT_OPS,
 	.fb_set_par = intel_fbdev_set_par,
+#ifdef BPM_DRM_DEDICATED_FB_IO_HELPERS_NOT_PRESENT
 	.fb_fillrect = drm_fb_helper_cfb_fillrect,
 	.fb_copyarea = drm_fb_helper_cfb_copyarea,
 	.fb_imageblit = drm_fb_helper_cfb_imageblit,
+#else
+	__FB_DEFAULT_DEFERRED_OPS_DRAW(intel_fbdev),
+#endif
 	.fb_pan_display = intel_fbdev_pan_display,
 	.fb_blank = intel_fbdev_blank,
 };
@@ -531,10 +541,18 @@ int intel_fbdev_init(struct drm_device *dev)
 		return -ENOMEM;
 
 	mutex_init(&ifbdev->hpd_lock);
+#ifdef BPM_DRM_FB_HELPER_PREPARE_PREFERRED_BPP_ARG_NOT_PRESENT
 	drm_fb_helper_prepare(dev, &ifbdev->helper, &intel_fb_helper_funcs);
 
 	if (!intel_fbdev_init_bios(dev, ifbdev))
 		ifbdev->preferred_bpp = 32;
+#else
+	drm_fb_helper_prepare(dev, &ifbdev->helper, 32, &intel_fb_helper_funcs);
+	if (intel_fbdev_init_bios(dev, ifbdev))
+		ifbdev->helper.preferred_bpp = ifbdev->preferred_bpp;
+	else
+		ifbdev->preferred_bpp = ifbdev->helper.preferred_bpp;
+#endif
 
 	ret = drm_fb_helper_init(dev, &ifbdev->helper);
 	if (ret) {
@@ -553,8 +571,12 @@ static void intel_fbdev_initial_config(void *data, async_cookie_t cookie)
 	struct intel_fbdev *ifbdev = data;
 
 	/* Due to peculiar init order wrt to hpd handling this is separate. */
+#ifdef BPM_DRM_FB_HELPER_PREPARE_PREFERRED_BPP_ARG_NOT_PRESENT
 	if (drm_fb_helper_initial_config(&ifbdev->helper,
 					 ifbdev->preferred_bpp))
+#else
+	if (drm_fb_helper_initial_config(&ifbdev->helper))
+#endif
 		intel_fbdev_unregister(to_i915(ifbdev->helper.dev));
 }
 

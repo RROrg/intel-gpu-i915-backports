@@ -10,7 +10,11 @@
 #include <linux/mmu_notifier.h>
 
 #include <drm/drm_gem.h>
+#if LINUX_VERSION_IS_GEQ(6,3,0)
+#include <drm/ttm/ttm_bo.h>
+#else
 #include <drm/ttm/ttm_bo_api.h>
+#endif
 #include <uapi/drm/i915_drm.h>
 
 #include "i915_active.h"

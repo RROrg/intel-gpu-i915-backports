@@ -1279,7 +1279,11 @@ static int __init mei_init(void)
 {
 	int ret;
 
+#if LINUX_VERSION_IS_GEQ(6,4,0)
+	mei_class = class_create("mei");
+#else
 	mei_class = class_create(THIS_MODULE, "mei");
+#endif
 	if (IS_ERR(mei_class)) {
 		pr_err("couldn't create class\n");
 		ret = PTR_ERR(mei_class);

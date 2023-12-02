@@ -115,8 +115,10 @@ static int __userptr_chunk(struct mmu_interval_notifier *notifier,
 
 		err = pin_user_pages_fast(addr, n, flags, pages);
 		if (err <= 0) {
+#if LINUX_VERSION_IS_LESS(6,3,0)
 			if (flags & FOLL_FAST_ONLY)
 				err = -EAGAIN;
+#endif
 			GEM_BUG_ON(err == 0);
 			goto out;
 		}
@@ -147,7 +149,11 @@ static void userptr_chunk(struct work_struct *wrk)
 	err = __userptr_chunk(notifier,
 			      memset(chunk, 0, sizeof(*chunk)),
 			      addr & PAGE_MASK, count,
+#if LINUX_VERSION_IS_LESS(6,3,0)
 			      (addr & ~PAGE_MASK) | FOLL_FAST_ONLY);
+#else
+			      addr & ~PAGE_MASK);
+#endif
 	i915_sw_fence_set_error_once(fence, err);
 	i915_sw_fence_complete(fence);
 }
@@ -183,7 +189,11 @@ static int userptr_work(struct dma_fence_work *base)
 {
 	struct userptr_work *wrk = container_of(base, typeof(*wrk), base);
 	struct drm_i915_gem_object *obj = wrk->obj;
+#if LINUX_VERSION_IS_LESS(6,3,0)
 	unsigned long use_threads = FOLL_FAST_ONLY;
+#else
+	unsigned long use_threads = 0;
+#endif
 	struct sg_table *sgt = wrk->pages;
 	struct userptr_chunk *chunk;
 	struct i915_sw_fence fence;

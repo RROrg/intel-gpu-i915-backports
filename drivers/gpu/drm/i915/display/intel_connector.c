@@ -283,14 +283,22 @@ intel_attach_aspect_ratio_property(struct drm_connector *connector)
 void
 intel_attach_hdmi_colorspace_property(struct drm_connector *connector)
 {
+#ifdef BPM_DRM_CONNECTOR_COLORSPACE_ARG_NOT_PRESENT
 	if (!drm_mode_create_hdmi_colorspace_property(connector))
+#else
+	if (!drm_mode_create_hdmi_colorspace_property(connector, 0))
+#endif
 		drm_connector_attach_colorspace_property(connector);
 }
 
 void
 intel_attach_dp_colorspace_property(struct drm_connector *connector)
 {
+#ifdef BPM_DRM_CONNECTOR_COLORSPACE_ARG_NOT_PRESENT
 	if (!drm_mode_create_dp_colorspace_property(connector))
+#else
+	if (!drm_mode_create_dp_colorspace_property(connector, 0))
+#endif
 		drm_connector_attach_colorspace_property(connector);
 }
 

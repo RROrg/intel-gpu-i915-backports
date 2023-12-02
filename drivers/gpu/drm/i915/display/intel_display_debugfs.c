@@ -531,7 +531,11 @@ static void intel_dp_info(struct seq_file *m,
 static void intel_dp_mst_info(struct seq_file *m,
 			      struct intel_connector *intel_connector)
 {
+#ifdef BPM_STRUCT_DRM_DISPLAY_INFO_HAS_AUDIO_NOT_PRESENT
 	bool has_audio = intel_connector->port->has_audio;
+#else
+	bool has_audio = intel_connector->base.display_info.has_audio;
+#endif
 
 	seq_printf(m, "\taudio support: %s\n", str_yes_no(has_audio));
 }

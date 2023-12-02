@@ -123,6 +123,26 @@ static inline void *slab_address(const struct slab *slab)
  * Internal slab definitions
  */
 
+#if LINUX_VERSION_IS_GEQ(6,5,0)
+#ifdef CONFIG_64BIT
+typedef u128 freelist_full_t;
+#else
+typedef u64 freelist_full_t;
+#endif
+
+/*
+ * Freelist pointer and counter to cmpxchg together, avoids the typical ABA
+ * problems with cmpxchg of just a pointer.
+ */
+typedef union {
+	struct {
+		void *freelist;
+		unsigned long counter;
+	};
+	freelist_full_t full;
+} freelist_aba_t;
+#endif
+
 /* Reuses the bits in struct page */
 struct slab {
 	unsigned long __page_flags;

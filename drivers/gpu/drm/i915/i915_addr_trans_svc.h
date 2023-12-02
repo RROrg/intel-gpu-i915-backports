@@ -9,7 +9,6 @@
 #include <linux/hmm.h>
 #include <linux/intel-iommu.h>
 #include <linux/pci-ats.h>
-#include "../../../../drivers/iommu/iommu-sva-lib.h"
 #include "i915_svm.h"
 #include "gt/intel_pagefault.h"
 #include "i915_drv.h"
@@ -17,6 +16,7 @@
 #include "gt/intel_gtt.h"
 
 #if  IS_ENABLED(CPTCFG_DRM_I915_ATS)
+#include "../../../../drivers/iommu/iommu-sva-lib.h"
 /* TODO: Private structure for ATS - need expansion */
 struct i915_ats_priv {
 	struct drm_i915_private *i915;

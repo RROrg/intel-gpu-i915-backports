@@ -1173,9 +1173,15 @@ ATTRIBUTE_GROUPS(mei_cldev);
  *
  * Return: 0 on success -ENOMEM on when add_uevent_var fails
  */
+#if LINUX_VERSION_IS_GEQ(6,3,0)
+static int mei_cl_device_uevent(const struct device *dev, struct kobj_uevent_env *env)
+{
+	const struct mei_cl_device *cldev = to_mei_cl_device(dev);
+#else
 static int mei_cl_device_uevent(struct device *dev, struct kobj_uevent_env *env)
 {
 	struct mei_cl_device *cldev = to_mei_cl_device(dev);
+#endif
 	const uuid_le *uuid = mei_me_cl_uuid(cldev->me_cl);
 	u8 version = mei_me_cl_ver(cldev->me_cl);
 

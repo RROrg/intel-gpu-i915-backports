@@ -229,7 +229,11 @@ static int intel_dp_mst_compute_config(struct intel_encoder *encoder,
 	pipe_config->has_pch_encoder = false;
 
 	if (intel_conn_state->force_audio == HDMI_AUDIO_AUTO)
+#ifdef BPM_STRUCT_DRM_DISPLAY_INFO_HAS_AUDIO_NOT_PRESENT
 		pipe_config->has_audio = connector->port->has_audio;
+#else
+		pipe_config->has_audio = connector->base.display_info.has_audio;
+#endif
 	else
 		pipe_config->has_audio =
 			intel_conn_state->force_audio == HDMI_AUDIO_ON;

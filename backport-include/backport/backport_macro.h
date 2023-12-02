@@ -612,11 +612,53 @@
  */
 #define BPM_VFIO_SR_IOV_VF_MIGRATION_NOT_PRESENT
 
+#if LINUX_VERSION_IS_LESS(6,3,0)
+/*
+ * 6c80a93be62d3
+ * drm/fb-helper: Initialize fb-helper's preferred BPP in prepare function
+ */
+#define BPM_DRM_FB_HELPER_PREPARE_PREFERRED_BPP_ARG_NOT_PRESENT
+
+/*
+ * 80ed86d4b6d7c
+ * drm/connector: Rename drm_mode_create_tv_properties
+ */
+#define BPM_DRM_MODE_CREATE_TV_PROPERTIES_LEGACY_NOT_PRESENT
+#endif
+
+#if LINUX_VERSION_IS_LESS(6,4,0)
 /*
  * Introduced in DII_6885
  * 55aab652a8a5 Backport DSC YUV420 patches
  */
 #define BPM_DRM_DP_DSC_SINK_SUPPORTS_FORMAT_NOT_PRESENT
+
+/*
+ * 5d844091f2370
+ * drm/scdc-helper: Pimp SCDC debugs
+ */
+#define BPM_DISPLAY_DRM_SCDC_CONNECTOR_ARG_NOT_PRESENT
+#endif
+
+#if (LINUX_VERSION_IS_LESS(6,5,0))
+/*
+ * c265f340eaa87
+ * drm/connector: Allow drivers to pass list of supported colorspaces
+ */
+#define BPM_DRM_CONNECTOR_COLORSPACE_ARG_NOT_PRESENT
+
+/*
+ * 43049f17b5262
+ * drm/i915: Implement dedicated fbdev I/O helpers
+ */
+#define BPM_DRM_DEDICATED_FB_IO_HELPERS_NOT_PRESENT
+
+/*
+ * 3d35ddfb07136
+ * drm/display/dp_mst: drop has_audio from struct drm_dp_mst_port
+ */
+#define BPM_STRUCT_DRM_DISPLAY_INFO_HAS_AUDIO_NOT_PRESENT
+#endif
 
 #if IS_ENABLED(CONFIG_AUXILIARY_BUS)
 /* 

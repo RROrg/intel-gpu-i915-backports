@@ -7,7 +7,11 @@
 #ifndef _LINUX_MEI_H
 #define _LINUX_MEI_H
 
+#if LINUX_VERSION_IS_GEQ(6,4,0)
+#include <linux/mei_uuid.h>
+#else
 #include <linux/uuid.h>
+#endif
 
 /*
  * This IOCTL is used to associate the current file descriptor with a
