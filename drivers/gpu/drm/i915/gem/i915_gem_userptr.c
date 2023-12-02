@@ -386,12 +386,29 @@ err_free:
 	return err;
 }
 
+static void unpin_folio_batch_dirty_lock(struct folio_batch *fbatch)
+{
+	unsigned int i, j, nr_folios = folio_batch_count(fbatch);
+
+	for (i = 0; i < nr_folios; ++i) {
+		struct folio *folio = fbatch->folios[i];
+		if (!folio_test_dirty(folio)) {
+			folio_lock(folio);
+			folio_mark_dirty(folio);
+			folio_unlock(folio);
+		}
+		for (j = 0; j < folio_nr_pages(folio); ++j)
+			unpin_user_page(folio_page(folio, j));
+	}
+}
+
 static int
 i915_gem_userptr_put_pages(struct drm_i915_gem_object *obj,
 			   struct sg_table *pages)
 {
 	struct sgt_iter sgt_iter;
-	struct pagevec pvec;
+	struct folio_batch fbatch;
+	struct folio *last = NULL;
 	struct page *page;
 	bool dirty;
 
@@ -407,19 +424,20 @@ i915_gem_userptr_put_pages(struct drm_i915_gem_object *obj,
 	 */
 	dirty = !i915_gem_object_is_readonly(obj);
 
-	pagevec_init(&pvec);
+	folio_batch_init(&fbatch);
 	for_each_sgt_page(page, sgt_iter, pages) {
-		if (!pagevec_add(&pvec, page)) {
-			unpin_user_pages_dirty_lock(pvec.pages,
-						    pagevec_count(&pvec),
-						    true);
-			pagevec_reinit(&pvec);
+		struct folio *folio = page_folio(page);
+
+		if (folio == last)
+			continue;
+		last = folio;
+		if (!folio_batch_add(&fbatch, folio)) {
+			unpin_folio_batch_dirty_lock(&fbatch);
+			folio_batch_reinit(&fbatch);
 		}
 	}
-	if (pagevec_count(&pvec))
-		unpin_user_pages_dirty_lock(pvec.pages,
-					    pagevec_count(&pvec),
-					    true);
+	if (folio_batch_count(&fbatch))
+		unpin_folio_batch_dirty_lock(&fbatch);
 
 	atomic64_add(obj->base.size, &obj->mm.region.mem->avail);
 
