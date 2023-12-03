@@ -85,4 +85,19 @@ int backport_register_shrinker(struct shrinker *shrinker);
 #endif
 
 #endif /* FOLIO_ADDRESS_PRESENT */
+
+#if LINUX_VERSION_IS_LESS(6,3,0)
+static inline void vm_flags_set(struct vm_area_struct *vma,
+				vm_flags_t flags)
+{
+	vma->vm_flags |= flags;
+}
+
+static inline void vm_flags_clear(struct vm_area_struct *vma,
+				  vm_flags_t flags)
+{
+	vma->vm_flags &= ~flags;
+}
+#endif /* < 6.3 */
+
 #endif /* __BACKPORT_MM_H */

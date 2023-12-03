@@ -1100,7 +1100,7 @@ int i915_gem_update_vma_info(struct drm_i915_gem_object *obj,
 		if (vma->vm_flags & VM_WRITE)
 			return -EINVAL;
 
-		vma->vm_flags &= ~VM_MAYWRITE;
+		vm_flags_clear(vma, VM_MAYWRITE);
 	}
 
 	anon = mmap_singleton(to_i915(obj->base.dev));
@@ -1108,12 +1108,12 @@ int i915_gem_update_vma_info(struct drm_i915_gem_object *obj,
 		return PTR_ERR(anon);
 
 	pvc_wa_disallow_rc6(i915);
-	vma->vm_flags |= VM_PFNMAP | VM_DONTEXPAND | VM_DONTDUMP;
+	vm_flags_set(vma, VM_PFNMAP | VM_DONTEXPAND | VM_DONTDUMP);
 	vma->vm_private_data = mmo;
 	vma->vm_pgoff = drm_vma_node_start(&mmo->vma_node);
 
 	if (i915_gem_object_has_iomem(obj))
-		vma->vm_flags |= VM_IO;
+		vm_flags_set(vma, VM_IO);
 
 	/*
 	 * We keep the ref on mmo->obj, not vm_file, but we require
@@ -1200,8 +1200,8 @@ static int i915_pci_barrier_mmap(struct file *filp,
 	if (vma->vm_flags & (VM_READ | VM_EXEC))
 		return -EINVAL;
 
-	vma->vm_flags &= ~(VM_MAYREAD | VM_MAYEXEC);
-	vma->vm_flags |= VM_PFNMAP | VM_DONTEXPAND | VM_DONTDUMP | VM_IO;
+	vm_flags_clear(vma, VM_MAYREAD | VM_MAYEXEC);
+	vm_flags_set(vma, VM_PFNMAP | VM_DONTEXPAND | VM_DONTDUMP | VM_IO);
 
 	prot = vm_get_page_prot(vma->vm_flags);
 #define LAST_DB_PAGE_OFFSET 0x7ff001

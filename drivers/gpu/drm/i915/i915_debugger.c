@@ -1888,7 +1888,7 @@ static int i915_debugger_vm_mmap(struct file *file, struct vm_area_struct *area)
 
 	area->vm_ops = &vm_mmap_ops;
 	area->vm_private_data = vm;
-	area->vm_flags |= VM_PFNMAP;
+	vm_flags_set(area, VM_PFNMAP);
 
 	gpu_invalidate_l3(vm->i915);
 	gpu_flush_engines(vm->i915, GEN12_RCU_ASYNC_FLUSH_AND_INVALIDATE_ALL);
