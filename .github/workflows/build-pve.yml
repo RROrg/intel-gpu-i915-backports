@@ -29,7 +29,7 @@ jobs:
 
       - name: Build
         working-directory: src
-        run: make i915dkmsdeb-pkg OS_DISTRIBUTION=UBUNTU_22.04_DESKTOP
+        run: make i915dkmsdeb-pkg
 
       - name: Save to artifacts
         uses: actions/upload-artifact@v3
