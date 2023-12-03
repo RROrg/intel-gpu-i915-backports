@@ -610,17 +610,21 @@ __i915_gem_object_release_shmem(struct drm_i915_gem_object *obj,
 	__start_cpu_write(obj);
 }
 
-static void check_release_pagevec(struct pagevec *pvec)
+/*
+ * Move folios to appropriate lru and release the batch, decrementing the
+ * ref count of those folios.
+ */
+static void check_release_folio_batch(struct folio_batch *fbatch)
 {
-	check_move_unevictable_pages(pvec);
-	__pagevec_release(pvec);
+	check_move_unevictable_folios(fbatch);
+	__folio_batch_release(fbatch);
 	cond_resched();
 }
 
-static void page_release(struct page *page, struct pagevec *pvec)
+static void batch_release(struct folio *folio, struct folio_batch *fbatch)
 {
-	if (!pagevec_add(pvec, page))
-		check_release_pagevec(pvec);
+	if (!folio_batch_add(fbatch, folio))
+		check_release_folio_batch(fbatch);
 }
 
 static bool need_swap(const struct drm_i915_gem_object *obj)
@@ -745,7 +749,8 @@ int i915_gem_object_put_pages_shmem(struct drm_i915_gem_object *obj, struct sg_t
 	struct inode *inode = obj->base.filp->f_inode;
 	bool do_swap = need_swap(obj);
 	struct sgt_iter sgt_iter;
-	struct pagevec pvec;
+	struct folio_batch fbatch;
+	struct folio *last = NULL;
 	struct page *page;
 
 	mapping_clear_unevictable(mapping);
@@ -754,7 +759,7 @@ int i915_gem_object_put_pages_shmem(struct drm_i915_gem_object *obj, struct sg_t
 	if (!pages->nents)
 		goto empty;
 
-	pagevec_init(&pvec);
+	folio_batch_init(&fbatch);
 	if (inode->i_blocks) {
 		bool clflush;
 
@@ -764,6 +769,7 @@ int i915_gem_object_put_pages_shmem(struct drm_i915_gem_object *obj, struct sg_t
 			clflush = true;
 
 		for_each_sgt_page(page, sgt_iter, pages) {
+			struct folio *folio = page_folio(page);
 			GEM_BUG_ON(PagePrivate2(page));
 
 			if (do_swap) {
@@ -772,8 +778,10 @@ int i915_gem_object_put_pages_shmem(struct drm_i915_gem_object *obj, struct sg_t
 					clflush_cache_range(ptr, PAGE_SIZE);
 					kunmap_atomic(ptr);
 				}
-				set_page_dirty(page);
-				mark_page_accessed(page);
+				if (folio != last) {
+					folio_mark_dirty(folio);
+					folio_mark_accessed(folio);
+				}
 			} else {
 #ifdef BPM_CANCEL_DIRTY_PAGE_NOT_PRESENT
 				folio_cancel_dirty(page_folio(page));
@@ -782,7 +790,10 @@ int i915_gem_object_put_pages_shmem(struct drm_i915_gem_object *obj, struct sg_t
 #endif
 			}
 
-			page_release(page, &pvec);
+			if (folio != last) {
+				batch_release(folio, &fbatch);
+				last = folio;
+			}
 		}
 	} else if (do_swap) { /* instantiate shmemfs backing store for swap */
 		struct scatterlist *sg;
@@ -798,18 +809,19 @@ int i915_gem_object_put_pages_shmem(struct drm_i915_gem_object *obj, struct sg_t
 
 			for (i = 0; i < BIT(order); i++) {
 				struct page *p = nth_page(page, i);
+				struct folio *f = page_folio(p);
 
 				lock_page(p);
 
 				SetPageUptodate(p);
-				set_page_dirty(p);
-				mark_page_accessed(p);
+				folio_mark_dirty(f);
+				folio_mark_accessed(f);
 
 				if (i915_add_to_page_cache_locked(p, mapping, idx, I915_GFP_ALLOW_FAIL)) {
 					unlock_page(p);
 
-					if (pagevec_count(&pvec))
-						check_release_pagevec(&pvec);
+					if (folio_batch_count(&fbatch))
+						check_release_folio_batch(&fbatch);
 
 					mapping_set_unevictable(mapping);
 
@@ -839,7 +851,7 @@ int i915_gem_object_put_pages_shmem(struct drm_i915_gem_object *obj, struct sg_t
 				unlock_page(p);
 				idx++;
 
-				page_release(p, &pvec);
+				batch_release(f, &fbatch);
 			}
 		}
 
@@ -860,11 +872,11 @@ int i915_gem_object_put_pages_shmem(struct drm_i915_gem_object *obj, struct sg_t
 			}
 
 			for (i = 0; i < BIT(order); i++)
-				page_release(nth_page(page, i), &pvec);
+				batch_release(page_folio(nth_page(page, i)), &fbatch);
 		}
 	}
-	if (pagevec_count(&pvec))
-		check_release_pagevec(&pvec);
+	if (folio_batch_count(&fbatch))
+		check_release_folio_batch(&fbatch);
 
 	i915_gem_gtt_finish_pages(obj, pages);
 	if (do_swap && i915_gem_object_needs_bit17_swizzle(obj))
