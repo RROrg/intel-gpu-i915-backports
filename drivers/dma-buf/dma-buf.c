@@ -698,6 +698,7 @@ struct dma_buf *dma_buf_export(const struct dma_buf_export_info *exp_info)
 
 	file->private_data = dmabuf;
 	file->f_path.dentry->d_fsdata = dmabuf;
+	file->f_mode |= FMODE_LSEEK;
 	dmabuf->file = file;
 
 	mutex_lock(&db_list.lock);
