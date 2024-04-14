@@ -11,6 +11,15 @@
 #undef CONFIG_BACKLIGHT_CLASS_DEVICE_MODULE
 #endif
 
+#if LINUX_VERSION_IS_GEQ(6,7,0)
+/*
+ * 4d70c74659d974
+ * 583cc9e4109529
+ *  drm/i915: dynamically allocate the i915_gem_mm shrinker
+ */
+#define BPM_I915_GEM_MM_SHRINKER_DYNAMIC
+#endif
+
 #if LINUX_VERSION_IS_GEQ(6,4,0)
 /*
  * 673aa1ed1c9b6 of: Rename of_modalias_node()

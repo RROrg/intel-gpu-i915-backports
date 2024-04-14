@@ -167,7 +167,11 @@ struct i915_gem_mm {
 
 	struct notifier_block oom_notifier;
 	struct notifier_block vmap_notifier;
+#ifdef BPM_I915_GEM_MM_SHRINKER_DYNAMIC
+	struct shrinker *shrinker;
+#else
 	struct shrinker shrinker;
+#endif
 
 #ifdef CONFIG_MMU_NOTIFIER
 	/**
