@@ -13,7 +13,6 @@
 
 #if LINUX_VERSION_IS_GEQ(6,7,0)
 /*
- * 4d70c74659d974
  * 583cc9e4109529
  *  drm/i915: dynamically allocate the i915_gem_mm shrinker
  */
@@ -1285,6 +1284,14 @@
  */
 #define BPM_DGLUT_24BIT_MTL_NOT_SUPPORTED
 
+#if LINUX_VERSION_IS_LESS(6,8,0)
+/*
+ * 7707dd6022593f
+ *  drm/dp_mst: Fix fractional DSC bpp handling
+ */
+#define BPM_DRM_DP_CALC_PBN_MODE_DSC_PRESENT
+#endif
+
 #if LINUX_VERSION_IS_LESS(6,7,0)
 /*
  * 7218779efc46 drm/edid: add drm_edid_is_digital()
@@ -1295,6 +1302,24 @@
  * 82b599ece3b8 drm/edid: parse source physical address
  */
 #define DRM_DISPLAY_INFO_SOURCE_PHYSICAL_ADDRESS_NOT_PRESENT
+
+/*
+ * e2272bfb18ee70
+ *  drm/dp: switch drm_dp_downstream_*() helpers to struct drm_edid
+ */
+#define BPM_DRM_DP_DOWNSTREAM_STRUCT_EDID
+
+/*
+ * fc93835bb0d7e2
+ *  drm: Add HPD state to drm_connector_oob_hotplug_event()
+ */
+#define BPM_DRM_CONNECTOR_OOB_HOTPLUG_EVENT_STATUS_NOT_PRESENT
+
+/*
+ * 5aa1dfcdf0a429
+ *  drm/mst: Refactor the flow for payload allocation/removement
+ */
+#define BPM_DRM_DP_REMOVE_PAYLOAD_AVAILABLE
 #endif
 
 #define BPM_DISABLE_DRM_DMABUF

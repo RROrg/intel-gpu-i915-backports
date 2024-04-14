@@ -5113,10 +5113,20 @@ intel_dp_update_dfp(struct intel_dp *intel_dp,
 {
 	struct drm_i915_private *i915 = dp_to_i915(intel_dp);
 	struct intel_connector *connector = intel_dp->attached_connector;
+#ifdef BPM_DRM_DP_DOWNSTREAM_STRUCT_EDID
+	const struct edid *edid;
+
+	/* FIXME: Get rid of drm_edid_raw() */
+	edid = drm_edid_raw(drm_edid);
+#endif
 
 	intel_dp->dfp.max_bpc =
 		drm_dp_downstream_max_bpc(intel_dp->dpcd,
+#ifdef BPM_DRM_DP_DOWNSTREAM_STRUCT_EDID
+					  intel_dp->downstream_ports, edid);
+#else
 					  intel_dp->downstream_ports, drm_edid);
+#endif
 
 	intel_dp->dfp.max_dotclock =
 		drm_dp_downstream_max_dotclock(intel_dp->dpcd,
@@ -5125,11 +5135,19 @@ intel_dp_update_dfp(struct intel_dp *intel_dp,
 	intel_dp->dfp.min_tmds_clock =
 		drm_dp_downstream_min_tmds_clock(intel_dp->dpcd,
 						 intel_dp->downstream_ports,
+#ifdef BPM_DRM_DP_DOWNSTREAM_STRUCT_EDID
+						 edid);
+#else
 						 drm_edid);
+#endif
 	intel_dp->dfp.max_tmds_clock =
 		drm_dp_downstream_max_tmds_clock(intel_dp->dpcd,
 						 intel_dp->downstream_ports,
+#ifdef BPM_DRM_DP_DOWNSTREAM_STRUCT_EDID
+						 edid);
+#else
 						 drm_edid);
+#endif
 
 	intel_dp->dfp.pcon_max_frl_bw =
 		drm_dp_get_pcon_max_frl_bw(intel_dp->dpcd,
@@ -5633,6 +5651,18 @@ static int intel_dp_connector_atomic_check(struct drm_connector *conn,
 	return intel_modeset_synced_crtcs(state, conn);
 }
 
+#ifdef BPM_DRM_CONNECTOR_OOB_HOTPLUG_EVENT_STATUS_NOT_PRESENT
+static void intel_dp_oob_hotplug_event(struct drm_connector *connector)
+{
+	struct intel_encoder *encoder = intel_attached_encoder(to_intel_connector(connector));
+	struct drm_i915_private *i915 = to_i915(connector->dev);
+
+	spin_lock_irq(&i915->irq_lock);
+	i915->display.hotplug.event_bits |= BIT(encoder->hpd_pin);
+	spin_unlock_irq(&i915->irq_lock);
+	queue_delayed_work(i915->unordered_wq, &i915->display.hotplug.hotplug_work, 0);
+}
+#else
 static void intel_dp_oob_hotplug_event(struct drm_connector *connector,
 				       enum drm_connector_status hpd_state)
 {
@@ -5654,6 +5684,7 @@ static void intel_dp_oob_hotplug_event(struct drm_connector *connector,
 	if (need_work)
 		queue_delayed_work(i915->unordered_wq, &i915->display.hotplug.hotplug_work, 0);
 }
+#endif
 
 static const struct drm_connector_funcs intel_dp_connector_funcs = {
 	.force = intel_dp_force,

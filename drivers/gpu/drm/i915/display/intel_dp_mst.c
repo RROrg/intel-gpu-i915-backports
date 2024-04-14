@@ -106,7 +106,12 @@ static int intel_dp_mst_find_vcpi_slots_for_bpp(struct intel_encoder *encoder,
 			continue;
 
 		crtc_state->pbn = drm_dp_calc_pbn_mode(adjusted_mode->crtc_clock,
+#ifdef BPM_DRM_DP_CALC_PBN_MODE_DSC_PRESENT
+						       dsc ? bpp << 4 : bpp,
+						       dsc);
+#else
 						       bpp << 4);
+#endif
 
 		slots = drm_dp_atomic_find_time_slots(state, &intel_dp->mst_mgr,
 						      connector->port,
@@ -546,6 +551,16 @@ static void intel_mst_disable_dp(struct intel_atomic_state *state,
 	struct intel_dp *intel_dp = &dig_port->dp;
 	struct intel_connector *connector =
 		to_intel_connector(old_conn_state->connector);
+#ifdef BPM_DRM_DP_REMOVE_PAYLOAD_AVAILABLE
+	struct drm_dp_mst_topology_state *old_mst_state =
+		drm_atomic_get_old_mst_topology_state(&state->base, &intel_dp->mst_mgr);
+	struct drm_dp_mst_topology_state *new_mst_state =
+		drm_atomic_get_new_mst_topology_state(&state->base, &intel_dp->mst_mgr);
+	const struct drm_dp_mst_atomic_payload *old_payload =
+		drm_atomic_get_mst_payload_state(old_mst_state, connector->port);
+	struct drm_dp_mst_atomic_payload *new_payload =
+		drm_atomic_get_mst_payload_state(new_mst_state, connector->port);
+#endif
 	struct drm_i915_private *i915 = to_i915(connector->base.dev);
 
 	drm_dbg_kms(&i915->drm, "active links %d\n",
@@ -553,6 +568,10 @@ static void intel_mst_disable_dp(struct intel_atomic_state *state,
 
 	intel_hdcp_disable(intel_mst->connector);
 
+#ifdef BPM_DRM_DP_REMOVE_PAYLOAD_AVAILABLE
+	drm_dp_remove_payload(&intel_dp->mst_mgr, new_mst_state,
+			      old_payload, new_payload);
+#endif
 	intel_audio_codec_disable(encoder, old_crtc_state, old_conn_state);
 }
 
@@ -566,6 +585,7 @@ static void intel_mst_post_disable_dp(struct intel_atomic_state *state,
 	struct intel_dp *intel_dp = &dig_port->dp;
 	struct intel_connector *connector =
 		to_intel_connector(old_conn_state->connector);
+#ifndef BPM_DRM_DP_REMOVE_PAYLOAD_AVAILABLE
 	struct drm_dp_mst_topology_state *old_mst_state =
 		drm_atomic_get_old_mst_topology_state(&state->base, &intel_dp->mst_mgr);
 	struct drm_dp_mst_topology_state *new_mst_state =
@@ -574,6 +594,7 @@ static void intel_mst_post_disable_dp(struct intel_atomic_state *state,
 		drm_atomic_get_mst_payload_state(old_mst_state, connector->port);
 	struct drm_dp_mst_atomic_payload *new_payload =
 		drm_atomic_get_mst_payload_state(new_mst_state, connector->port);
+#endif
 	struct drm_i915_private *dev_priv = to_i915(connector->base.dev);
 	bool last_mst_stream;
 
@@ -587,7 +608,9 @@ static void intel_mst_post_disable_dp(struct intel_atomic_state *state,
 
 	intel_disable_transcoder(old_crtc_state);
 
+#ifndef BPM_DRM_DP_REMOVE_PAYLOAD_AVAILABLE
 	drm_dp_remove_payload_part1(&intel_dp->mst_mgr, new_mst_state, new_payload);
+#endif
 
 	clear_act_sent(encoder, old_crtc_state);
 
@@ -596,8 +619,10 @@ static void intel_mst_post_disable_dp(struct intel_atomic_state *state,
 
 	wait_for_act_sent(encoder, old_crtc_state);
 
+#ifndef BPM_DRM_DP_REMOVE_PAYLOAD_AVAILABLE
 	drm_dp_remove_payload_part2(&intel_dp->mst_mgr, new_mst_state,
 				    old_payload, new_payload);
+#endif
 
 	intel_ddi_disable_transcoder_func(old_crtc_state);
 
@@ -930,7 +955,11 @@ intel_dp_mst_mode_valid_ctx(struct drm_connector *connector,
 		return ret;
 
 	if (mode_rate > max_rate || mode->clock > max_dotclk ||
+#ifdef BPM_DRM_DP_CALC_PBN_MODE_DSC_PRESENT
+	    drm_dp_calc_pbn_mode(mode->clock, min_bpp, false) > port->full_pbn) {
+#else
 	    drm_dp_calc_pbn_mode(mode->clock, min_bpp << 4) > port->full_pbn) {
+#endif
 		*status = MODE_CLOCK_HIGH;
 		return 0;
 	}
