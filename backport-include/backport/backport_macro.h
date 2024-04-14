@@ -1284,7 +1284,8 @@
  */
 #define BPM_DGLUT_24BIT_MTL_NOT_SUPPORTED
 
-#if LINUX_VERSION_IS_LESS(6,8,0)
+#if LINUX_VERSION_IS_LESS(6,8,0) && \
+	!(LINUX_VERSION_IN_RANGE(6,5,13, 6,5,99) && PVE_RELEASE_VERSION_IS_GEQ(4))
 /*
  * 7707dd6022593f
  *  drm/dp_mst: Fix fractional DSC bpp handling
