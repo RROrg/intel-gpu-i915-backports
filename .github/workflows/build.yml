@@ -103,11 +103,10 @@ jobs:
         working-directory: src
         run: |
           REF=${{ github.event.ref }}
-          if [[ $REF == refs/tags/* ]]; then
-            BUILD_VERSION=${REF##*-}
-          else
-            BUILD_VERSION=
-          fi
+          case "$REF" in
+            refs/tags/*) BUILD_VERSION=${REF##*-} ;;
+            *) BUILD_VERSION= ;;
+          esac
           make BUILD_CONFIG=nodrm BUILD_VERSION=$BUILD_VERSION i915dkmsdeb-pkg
 
       - name: Save to artifacts
