@@ -25,7 +25,7 @@ Each project is tagged consistently, so when pulling these repos, pull the same 
 
 | OS Distribution | OS Version | Kernel Version  | Installation Instructions |
 |---  |---  |---  |--- |
-| Proxmox VE | 8.1 | 6.5+ | Install the released .deb via `apt install` |
+| Proxmox VE | 8.1--8.2 | 6.5, 6.8 | Install the released .deb via `apt install` |
 | DSM for SA6400 | 7.1.x / 7.2.x | 5.10.55 | Shipped by supported loaders |
 
 
