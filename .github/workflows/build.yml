@@ -57,7 +57,7 @@ jobs:
       - name: Copy necessary firmware
         run: |
           SOURCE=linux-firmware/i915
-          DEST=out/firmware
+          DEST=out/firmware/i915
           mkdir -p $DEST
           while read L; do
             L=$(basename $L)
