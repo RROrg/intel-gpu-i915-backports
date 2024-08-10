@@ -30,3 +30,29 @@ index 584505e76a6e..f97070a52498 100644
  DRM_FBDEV_OVERALLOC=
  DRM_FBDEV_LEAK_PHYS_SMEM=
  DRM_LOAD_EDID_FIRMWARE=
+diff --git a/drivers/gpu/drm/i915/display/intel_display_debugfs.c b/drivers/gpu/drm/i915/display/intel_display_debugfs.c
+index cca4c0ae4524..49a97b6f4648 100644
+--- a/drivers/gpu/drm/i915/display/intel_display_debugfs.c
++++ b/drivers/gpu/drm/i915/display/intel_display_debugfs.c
+@@ -113,7 +113,7 @@ static int i915_gem_framebuffer_info(struct seq_file *m, void *data)
+ 	struct intel_framebuffer *fbdev_fb = NULL;
+ 	struct drm_framebuffer *drm_fb;
+ 
+-#ifdef CPTFIG_DRM_FBDEV_EMULATION
++#ifdef CONFIG_DRM_FBDEV_EMULATION
+ 	fbdev_fb = intel_fbdev_framebuffer(dev_priv->display.fbdev.fbdev);
+ 	if (fbdev_fb) {
+ 		seq_printf(m, "fbcon size: %d x %d, depth %d, %d bpp, modifier 0x%llx, refcount %d, obj ",
+diff --git a/drivers/gpu/drm/i915/display/intel_fbdev.h b/drivers/gpu/drm/i915/display/intel_fbdev.h
+index 04fd523a5023..094835945286 100644
+--- a/drivers/gpu/drm/i915/display/intel_fbdev.h
++++ b/drivers/gpu/drm/i915/display/intel_fbdev.h
+@@ -13,7 +13,7 @@ struct drm_i915_private;
+ struct intel_fbdev;
+ struct intel_framebuffer;
+ 
+-#ifdef CPTFIG_DRM_FBDEV_EMULATION
++#ifdef CONFIG_DRM_FBDEV_EMULATION
+ int intel_fbdev_init(struct drm_device *dev);
+ void intel_fbdev_initial_config_async(struct drm_i915_private *dev_priv);
+ void intel_fbdev_unregister(struct drm_i915_private *dev_priv);
