@@ -1284,6 +1284,14 @@
  */
 #define BPM_DGLUT_24BIT_MTL_NOT_SUPPORTED
 
+#if LINUX_VERSION_IN_RANGE(6,8,12, 6,8,99) && PVE_RELEASE_VERSION_IS_GEQ(1)
+/*
+ * 5a507b7d2be15f
+ *  drm/mst: Fix NULL pointer dereference at drm_dp_add_payload_part2
+ */
+#define BPM_DRM_DP_ADD_PAYLOAD_PART2_STATE_ARG_NOT_PRESENT
+#endif
+
 #if LINUX_VERSION_IS_LESS(6,8,0) && \
 	!(LINUX_VERSION_IN_RANGE(6,5,13, 6,5,99) && PVE_RELEASE_VERSION_IS_GEQ(4))
 /*
