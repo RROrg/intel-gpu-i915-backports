@@ -1284,12 +1284,22 @@
  */
 #define BPM_DGLUT_24BIT_MTL_NOT_SUPPORTED
 
-#if LINUX_VERSION_IN_RANGE(6,8,12, 6,8,99) && PVE_RELEASE_VERSION_IS_GEQ(1)
+#if LINUX_VERSION_IN_RANGE(6,8,12, 6,8,99)
+#if PVE_RELEASE_VERSION_IS_GEQ(1)
 /*
  * 5a507b7d2be15f
  *  drm/mst: Fix NULL pointer dereference at drm_dp_add_payload_part2
  */
 #define BPM_DRM_DP_ADD_PAYLOAD_PART2_STATE_ARG_NOT_PRESENT
+#endif
+
+#if PVE_RELEASE_VERSION_IS_GEQ(5)
+/*
+ * c0ef3df8dbaef5
+ *  PM: runtime: Simplify pm_runtime_get_if_active() usage
+ */
+#define BPM_PM_RUNTIME_GET_IF_ACTIVE_IGN_USAGE_COUNT_ARG_NOT_PRESENT
+#endif
 #endif
 
 #if LINUX_VERSION_IS_LESS(6,8,0) && \
