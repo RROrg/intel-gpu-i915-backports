@@ -3,7 +3,7 @@
 #include <linux/version.h>
 #include <backport/autoconf.h>
 
-#ifdef CONFIG_SYNO_EPYC7002
+#ifdef CONFIG_SYNO_X64
 // These modules are declared in kernel .config but not actually present on the
 // system. Undef the flags to avoid introducing unnecessary dependencies.
 #undef CONFIG_FB_MODULE
