@@ -132,8 +132,12 @@ obj-$(CPTCFG_DRM_KMS_HELPER) += drm_kms_helper.o
 
 obj-y			+= tests/
 
+ifneq ($(CONFIG_DRM_MIPI_DBI),y)
 obj-$(CPTCFG_DRM_MIPI_DBI) += drm_mipi_dbi.o
+endif
+ifneq ($(CONFIG_DRM_MIPI_DSI),y)
 obj-$(CPTCFG_DRM_MIPI_DSI) += drm_mipi_dsi.o
+endif
 obj-y			+= display/
 obj-$(CPTCFG_DRM_TTM)	+= ttm/
 obj-$(CPTCFG_DRM_I915)	+= i915/

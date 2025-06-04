@@ -1426,8 +1426,9 @@ int intel_gmch_probe(struct pci_dev *bridge_pdev, struct pci_dev *gpu_pdev,
 
 	return 1;
 }
+#if !defined(CONFIG_SYNO_GEMINILAKE) && !defined(CONFIG_SYNO_GEMINILAKENK)
 EXPORT_SYMBOL(intel_gmch_probe);
-
+#endif
 void intel_gmch_gtt_get(u64 *gtt_total,
 			phys_addr_t *mappable_base,
 			resource_size_t *mappable_end)
@@ -1458,7 +1459,8 @@ void intel_gmch_remove(void)
 		pci_dev_put(intel_private.bridge_dev);
 	intel_private.driver = NULL;
 }
+#if !defined(CONFIG_SYNO_GEMINILAKE) && !defined(CONFIG_SYNO_GEMINILAKENK)
 EXPORT_SYMBOL(intel_gmch_remove);
-
+#endif
 MODULE_AUTHOR("Dave Jones, Various @Intel");
 MODULE_LICENSE("GPL and additional rights");
